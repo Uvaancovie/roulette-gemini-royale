@@ -1,4 +1,4 @@
-import { RouletteNumber, BetType } from './types';
+import { RouletteNumber, BetType, AvatarPresetId } from './types';
 
 // European Roulette Wheel Order (Clockwise starting from 0)
 export const WHEEL_ORDER = [
@@ -95,4 +95,31 @@ export const getCoveredNumbers = (type: BetType, target: number | string): numbe
     if (include) numbers.push(i);
   }
   return numbers;
+};
+
+export const AVATAR_DEFINITIONS: Record<AvatarPresetId, { name: string, emotions: Record<string, string> }> = {
+  classic: {
+    name: 'The Classic',
+    emotions: { IDLE: '🤵', WIN: '🤑', LOSS: '😅', SPINNING: '🤞', THINKING: '🤔' }
+  },
+  cat: {
+    name: 'Mr. Whiskers',
+    emotions: { IDLE: '🐱', WIN: '😻', LOSS: '😿', SPINNING: '🐈', THINKING: '😼' }
+  },
+  alien: {
+    name: 'Zorg',
+    emotions: { IDLE: '👽', WIN: '🛸', LOSS: '😵', SPINNING: '👾', THINKING: '📡' }
+  },
+  zombie: {
+    name: 'Rot',
+    emotions: { IDLE: '🧟', WIN: '🧠', LOSS: '💀', SPINNING: '🦴', THINKING: '🌑' }
+  },
+  clown: {
+    name: 'Jester',
+    emotions: { IDLE: '🤡', WIN: '🥳', LOSS: '😭', SPINNING: '🤹', THINKING: '🎈' }
+  },
+  cyber: {
+    name: 'Unit 734',
+    emotions: { IDLE: '🤖', WIN: '⚡', LOSS: '🔋', SPINNING: '🌀', THINKING: '💾' }
+  }
 };

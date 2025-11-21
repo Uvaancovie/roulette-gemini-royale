@@ -101,33 +101,64 @@ export const getStrategicTip = async (
   balance: number
 ): Promise<string> => {
   try {
-    const historyStr = history.slice(0, 10).map(h => h.number).join(', ');
+    // Statistical Analysis
+    const totalSamples = history.length || 1;
     const redCount = history.filter(h => h.color === 'red').length;
     const blackCount = history.filter(h => h.color === 'black').length;
+    const greenCount = history.filter(h => h.color === 'green').length;
     
-    const prompt = `
-      You are a superstitious roulette strategist (AI Advisor).
-      Recent numbers: [${historyStr}].
-      Red/Black split in last 10: ${redCount}/${blackCount}.
-      User Balance: $${balance}.
+    const redPct = ((redCount / totalSamples) * 100).toFixed(1);
+    const blackPct = ((blackCount / totalSamples) * 100).toFixed(1);
+    
+    // Find Hot Numbers
+    const counts: Record<number, number> = {};
+    history.forEach(h => counts[h.number] = (counts[h.number] || 0) + 1);
+    const sortedNumbers = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+    const hotNumber = sortedNumbers.length > 0 ? sortedNumbers[0][0] : 'None';
+    
+    const historyStr = history.slice(0, 15).map(h => h.number).join(', ');
 
-      Give a specific, short betting tip (max 15 words).
-      Base it on "Gambler's Fallacy" or "Hot Hand" logic.
-      Example: "Red is hot, ride the streak!" or "Black is due, bet big."
-      Do not be neutral. Be opinionated.
+    const prompt = `
+      You are the "Gemini Probability Engine", a sophisticated AI analyzing Roulette variance.
+      
+      [DATA STREAM]
+      Recent Outcomes: [${historyStr}]
+      Sample Size: ${totalSamples}
+      Distribution: Red ${redPct}% | Black ${blackPct}% | Green ${((greenCount/totalSamples)*100).toFixed(1)}%
+      Hot Number: ${hotNumber}
+      Player Balance: $${balance}
+
+      [INSTRUCTION]
+      Analyze the data for deviations from statistical probability (Gambler's Fallacy, Regression to Mean, Clustering).
+      
+      [OUTPUT FORMAT]
+      ANALYSIS: <Short technical observation, max 10 words>
+      SUGGESTION: <Specific bet recommendation>
+      CONFIDENCE: <0-100>%
+
+      [EXAMPLES]
+      ANALYSIS: Red is under-represented (-12% deviation).
+      SUGGESTION: Bet RED (Martingale advisable).
+      CONFIDENCE: 78%
+
+      ANALYSIS: Number ${hotNumber} shows anomalous clustering.
+      SUGGESTION: Bet Straight ${hotNumber}.
+      CONFIDENCE: 65%
+      
+      Return ONLY the formatted text. No conversational filler.
     `;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
-        temperature: 1.0,
-        maxOutputTokens: 50,
+        temperature: 0.5, // Low temp for robotic/math precision
+        maxOutputTokens: 100,
       }
     });
 
-    return response.text || "Follow your gut.";
+    return response.text || "ANALYSIS: Insufficient data for projection.\nSUGGESTION: Bet Low/High.\nCONFIDENCE: 50%";
   } catch (error) {
-    return "The spirits are silent right now.";
+    return "ANALYSIS: Data stream interrupted.\nSUGGESTION: Manual bet.\nCONFIDENCE: 0%";
   }
 };

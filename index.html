@@ -11,6 +11,7 @@
           extend: {
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
             },
             colors: {
               felt: {
@@ -29,6 +30,9 @@
               'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
               'particle-explode': 'particle-explode 1s ease-out forwards',
               'flash-slice': 'flash-slice 1.5s ease-in-out infinite',
+              'shockwave': 'shockwave 1.5s ease-out infinite',
+              'shake-tilt': 'shake-tilt 0.5s ease-in-out',
+              'gold-pulse': 'gold-pulse 2s infinite',
             },
             keyframes: {
               fadeInUp: {
@@ -42,6 +46,20 @@
               'flash-slice': {
                 '0%, 100%': { filter: 'brightness(1) drop-shadow(0 0 0 transparent)' },
                 '50%': { filter: 'brightness(1.5) drop-shadow(0 0 15px rgba(251, 191, 36, 0.8))' },
+              },
+              'shockwave': {
+                '0%': { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(251, 191, 36, 0.7)' },
+                '70%': { transform: 'scale(1.05)', boxShadow: '0 0 0 20px rgba(251, 191, 36, 0)' },
+                '100%': { transform: 'scale(1.05)', boxShadow: '0 0 0 0 rgba(251, 191, 36, 0)' },
+              },
+              'shake-tilt': {
+                '0%, 100%': { transform: 'translateX(0) rotate(0deg)' },
+                '25%': { transform: 'translateX(-5px) rotate(-2deg)' },
+                '75%': { transform: 'translateX(5px) rotate(2deg)' },
+              },
+              'gold-pulse': {
+                '0%, 100%': { boxShadow: '0 0 10px rgba(251, 191, 36, 0.5), inset 0 0 10px rgba(251, 191, 36, 0.2)' },
+                '50%': { boxShadow: '0 0 25px rgba(251, 191, 36, 0.8), inset 0 0 20px rgba(251, 191, 36, 0.5)' },
               }
             },
             dropShadow: {
@@ -52,7 +70,7 @@
       }
     </script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
       
       .scrollbar-hide::-webkit-scrollbar {
           display: none;

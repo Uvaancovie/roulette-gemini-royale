@@ -6,22 +6,64 @@ import { StatsPanel } from './components/StatsPanel';
 import { DealerChat } from './components/DealerChat';
 import { GameControls } from './components/GameControls';
 import { HistoryModal } from './components/HistoryModal';
-import { BetType, ChipValue, GameHistory, PlacedBet, DealerEmotion } from './types';
+import { ConfirmationModal } from './components/ConfirmationModal';
+import { DealerCustomizationModal } from './components/DealerCustomizationModal';
+import { BetType, ChipValue, GameHistory, PlacedBet, DealerEmotion, DealerAvatarConfig } from './types';
 import { getNumberColor, getCoveredNumbers } from './constants';
 import { getDealerCommentary, getStrategicTip } from './services/geminiService';
 import { Toaster, toast } from 'react-hot-toast';
 
-// Simple custom alert/toast component overlay
-const WinOverlay: React.FC<{ amount: number | null, onClose: () => void }> = ({ amount, onClose }) => {
-  if (amount === null) return null;
+interface RoundResult {
+  totalBet: number;
+  winnings: number;
+}
+
+// Custom alert/toast component overlay for Round Results
+const ResultOverlay: React.FC<{ result: RoundResult | null, onClose: () => void }> = ({ result, onClose }) => {
+  if (!result) return null;
+  
+  const { totalBet, winnings } = result;
+  const isWin = winnings > 0;
+  const isBigWin = isWin && winnings >= totalBet * 3; // Simple heuristic for big win styling
+  const netResult = winnings - totalBet;
+
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
-      <div className="bg-gradient-to-b from-yellow-500 to-yellow-700 p-1 rounded-2xl shadow-2xl transform scale-110 animate-bounce-short">
-        <div className="bg-black rounded-xl p-8 text-center border border-yellow-400/50">
-          <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-4xl font-bold text-white mb-2 uppercase tracking-widest">You Won!</h2>
-          <p className="text-5xl font-extrabold text-yellow-400 drop-shadow-md">${amount.toLocaleString()}</p>
-          <p className="text-gray-400 mt-4 text-sm animate-pulse">Tap anywhere to continue</p>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
+      <div className={`
+        relative p-1 rounded-2xl shadow-2xl transform scale-110 transition-all
+        ${isWin ? 'bg-gradient-to-b from-yellow-500 to-yellow-700 animate-bounce-short' : 'bg-gradient-to-b from-red-900 to-gray-900 animate-shake-tilt'}
+        ${isBigWin ? 'animate-gold-pulse' : ''}
+      `}>
+        <div className={`
+          rounded-xl p-8 text-center border min-w-[320px]
+          ${isWin ? 'bg-black border-yellow-400/50' : 'bg-gray-950 border-red-900/50'}
+        `}>
+          <div className="text-6xl mb-4">{isWin ? (isBigWin ? '🤑' : '🎉') : '💸'}</div>
+          
+          <h2 className={`text-4xl font-bold mb-2 uppercase tracking-widest ${isWin ? 'text-white' : 'text-red-500'}`}>
+            {isWin ? 'You Won!' : 'You Lost'}
+          </h2>
+          
+          <div className="my-6 space-y-3 bg-white/5 p-4 rounded-lg border border-white/10">
+             <div className="flex justify-between text-sm text-gray-400 uppercase tracking-wider border-b border-white/10 pb-2">
+                <span>Total Wager</span>
+                <span className="font-mono text-white">${totalBet.toLocaleString()}</span>
+             </div>
+             <div className="flex justify-between text-sm text-gray-400 uppercase tracking-wider border-b border-white/10 pb-2">
+                <span>Payout</span>
+                <span className={`font-mono ${isWin ? 'text-yellow-400' : 'text-gray-500'}`}>
+                  ${winnings.toLocaleString()}
+                </span>
+             </div>
+             <div className="flex justify-between text-xl font-bold pt-1">
+                <span>Net Result</span>
+                <span className={`font-mono ${netResult >= 0 ? 'text-green-400' : 'text-red-500'}`}>
+                  {netResult > 0 ? '+' : ''}{netResult.toLocaleString()}
+                </span>
+             </div>
+          </div>
+
+          <p className="text-gray-500 mt-6 text-xs animate-pulse uppercase font-bold tracking-widest">Tap anywhere to continue</p>
         </div>
       </div>
     </div>
@@ -48,16 +90,29 @@ const App: React.FC = () => {
   const [sessionHistory, setSessionHistory] = useState<HistoryEntry[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [targetNumber, setTargetNumber] = useState<number | null>(null);
-  const [winAmount, setWinAmount] = useState<number | null>(null);
+  
+  // Result State
+  const [winAmount, setWinAmount] = useState<number | null>(null); // For dealer/board effects
+  const [roundResult, setRoundResult] = useState<RoundResult | null>(null); // For overlay
+  
   const [previousBetActions, setPreviousBetActions] = useState<PlacedBet[]>([]);
   const [highlightedNumbers, setHighlightedNumbers] = useState<Set<number>>(new Set());
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  
+  // Win Animation State
+  const [winIntensity, setWinIntensity] = useState(0);
+  
+  // Confirmation State
+  const [confirmBets, setConfirmBets] = useState(false);
+  const [pendingBet, setPendingBet] = useState<{type: BetType, target: number | string, payoutRatio: number} | null>(null);
   
   // AI Dealer State
   const [dealerMessage, setDealerMessage] = useState("Welcome to the high rollers table. Place your bets.");
   const [isDealerThinking, setIsDealerThinking] = useState(false);
   const [isTipMode, setIsTipMode] = useState(false);
   const [dealerEmotion, setDealerEmotion] = useState<DealerEmotion>('IDLE');
+  const [dealerAvatarConfig, setDealerAvatarConfig] = useState<DealerAvatarConfig>({ type: 'PRESET', presetId: 'classic' });
 
   // Derived State: Aggregated bets for display
   const currentAggregatedBets = useMemo(() => {
@@ -76,14 +131,8 @@ const App: React.FC = () => {
 
   const totalBetAmount = betActions.reduce((sum, bet) => sum + bet.amount, 0);
 
-  // Betting Actions
-  const handlePlaceBet = (type: BetType, target: number | string, payoutRatio: number) => {
-    if (isSpinning) return;
-    if (balance < selectedChip) {
-      toast.error("Insufficient funds!");
-      return;
-    }
-
+  // Core Bet Execution Logic
+  const executeBet = (type: BetType, target: number | string, payoutRatio: number) => {
     setBalance(prev => prev - selectedChip);
     
     const newBet: PlacedBet = {
@@ -98,6 +147,22 @@ const App: React.FC = () => {
     // Reset tip mode if user interacts
     if (isTipMode) setIsTipMode(false);
     setDealerEmotion('IDLE');
+    setPendingBet(null);
+  };
+
+  // Betting Actions
+  const handlePlaceBet = (type: BetType, target: number | string, payoutRatio: number) => {
+    if (isSpinning) return;
+    if (balance < selectedChip) {
+      toast.error("Insufficient funds!");
+      return;
+    }
+
+    if (confirmBets) {
+      setPendingBet({ type, target, payoutRatio });
+    } else {
+      executeBet(type, target, payoutRatio);
+    }
   };
 
   const handleUndo = () => {
@@ -184,6 +249,8 @@ const App: React.FC = () => {
     
     setIsSpinning(true);
     setWinAmount(null);
+    setRoundResult(null);
+    setWinIntensity(0);
     setIsTipMode(false);
     setDealerEmotion('SPINNING');
     
@@ -260,13 +327,27 @@ const App: React.FC = () => {
     };
     setSessionHistory([sessionEntry, ...sessionHistory]);
 
+    // Set Result for Overlay (Both win and loss)
+    setRoundResult({ totalBet: playedTotalBet, winnings: totalWinnings });
+
     // Win Feedback & Emotion
+    let currentWinIntensity = 0;
     if (totalWinnings > 0) {
       setWinAmount(totalWinnings);
       setDealerEmotion('WIN');
+      
+      // Calculate Intensity (1 = Standard, 2 = Big)
+      const winRatio = totalWinnings / (playedTotalBet || 1);
+      if (winRatio > 3 || totalWinnings >= 500) {
+        currentWinIntensity = 2;
+      } else {
+        currentWinIntensity = 1;
+      }
     } else {
       setDealerEmotion('LOSS');
+      currentWinIntensity = 0;
     }
+    setWinIntensity(currentWinIntensity);
 
     // Clear Bets
     setBetActions([]);
@@ -287,12 +368,15 @@ const App: React.FC = () => {
     
     // Reset emotion after a delay
     setTimeout(() => {
-      if (!isSpinning) setDealerEmotion('IDLE');
-    }, 4000);
+      if (!isSpinning) {
+         setDealerEmotion('IDLE');
+         setWinIntensity(0);
+      }
+    }, 5000);
   };
 
   return (
-    <div className="min-h-screen bg-felt-900 text-white flex flex-col font-sans relative">
+    <div className="min-h-screen bg-felt-900 text-white flex flex-col font-sans relative overflow-x-hidden">
       <Toaster position="top-center" toastOptions={{
         style: {
           background: '#333',
@@ -304,9 +388,28 @@ const App: React.FC = () => {
       {/* Background Texture */}
       <div className="fixed inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/felt.png')]"></div>
 
-      <WinOverlay amount={winAmount} onClose={() => setWinAmount(null)} />
+      <ResultOverlay result={roundResult} onClose={() => setRoundResult(null)} />
+      
       <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} history={sessionHistory} />
       
+      <DealerCustomizationModal 
+        isOpen={isAvatarModalOpen} 
+        onClose={() => setIsAvatarModalOpen(false)}
+        currentConfig={dealerAvatarConfig}
+        onSave={(config) => {
+          setDealerAvatarConfig(config);
+          setIsAvatarModalOpen(false);
+          toast.success("Dealer avatar updated!");
+        }}
+      />
+
+      <ConfirmationModal 
+        isOpen={!!pendingBet} 
+        betDetails={pendingBet ? { ...pendingBet, amount: selectedChip } : null}
+        onConfirm={() => pendingBet && executeBet(pendingBet.type, pendingBet.target, pendingBet.payoutRatio)}
+        onCancel={() => setPendingBet(null)}
+      />
+
       {/* Header */}
       <header className="px-4 py-3 bg-black/60 flex justify-between items-center border-b border-white/10 backdrop-blur-md sticky top-0 z-50 shadow-lg">
         <div className="flex items-center space-x-3">
@@ -317,6 +420,13 @@ const App: React.FC = () => {
           <h1 className="md:hidden text-lg font-black text-yellow-500 uppercase tracking-widest">GR</h1>
         </div>
         <div className="flex items-center gap-4">
+           <button 
+            onClick={() => setIsAvatarModalOpen(true)}
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-gray-300 hover:text-yellow-400 border border-white/10"
+            title="Customize Dealer"
+          >
+            ⚙️
+          </button>
           <button 
             onClick={() => setIsHistoryOpen(true)}
             className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-xs md:text-sm text-gray-300 hover:text-white"
@@ -332,7 +442,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Game Area - No overflow restriction, allow scroll */}
+      {/* Main Game Area */}
       <main className="flex-1 p-2 md:p-4 flex flex-col items-center relative z-10 pb-32 md:pb-24">
         
         <DealerChat 
@@ -342,19 +452,34 @@ const App: React.FC = () => {
           onAskForTip={handleAskForTip}
           canAsk={!isSpinning}
           emotion={dealerEmotion}
+          avatarConfig={dealerAvatarConfig}
+          winAmount={winAmount}
         />
 
         <div className="my-4 md:my-8 w-full flex justify-center scale-75 md:scale-100 transition-transform -mb-8 md:mb-0">
           <RouletteWheel 
             targetNumber={targetNumber} 
             isSpinning={isSpinning} 
-            onSpinComplete={handleSpinComplete} 
+            onSpinComplete={handleSpinComplete}
+            winIntensity={winIntensity}
           />
         </div>
 
         <div className="w-full max-w-5xl flex flex-col items-center gap-4">
           
-          <ChipSelector selectedChip={selectedChip} onSelect={setSelectedChip} />
+          <div className="flex flex-col items-center w-full">
+            <ChipSelector selectedChip={selectedChip} onSelect={setSelectedChip} />
+            
+            {/* Confirm Bet Toggle */}
+            <div className="flex justify-center mt-2 mb-1">
+              <label className="flex items-center space-x-2 cursor-pointer group" onClick={() => setConfirmBets(!confirmBets)}>
+                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${confirmBets ? 'bg-green-600 border-green-600' : 'border-gray-600 bg-black/40 group-hover:border-gray-400'}`}>
+                  {confirmBets && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
+                </div>
+                <span className="text-[10px] md:text-xs text-gray-400 group-hover:text-gray-300 select-none uppercase tracking-wider font-bold">Confirm bets</span>
+              </label>
+            </div>
+          </div>
 
           <BettingBoard 
              onPlaceBet={handlePlaceBet} 

@@ -35,3 +35,11 @@ export interface GameHistory {
 export type ChipValue = 1 | 5 | 25 | 100 | 500;
 
 export type DealerEmotion = 'IDLE' | 'SPINNING' | 'WIN' | 'LOSS' | 'THINKING';
+
+export type AvatarPresetId = 'classic' | 'cat' | 'alien' | 'zombie' | 'clown' | 'cyber';
+
+export interface DealerAvatarConfig {
+  type: 'PRESET' | 'UPLOAD';
+  presetId?: AvatarPresetId;
+  customSrc?: string;
+}

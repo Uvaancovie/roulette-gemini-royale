@@ -5,17 +5,32 @@ interface RouletteWheelProps {
   targetNumber: number | null;
   isSpinning: boolean;
   onSpinComplete: () => void;
+  winIntensity?: number; // 0 = none/loss, 1 = normal, 2 = big
 }
 
 // Particle component for the winning explosion
-const WinParticles = () => {
-  const particles = Array.from({ length: 30 }).map((_, i) => {
+const WinParticles = ({ intensity = 1 }: { intensity: number }) => {
+  const particleCount = intensity > 1 ? 50 : 20;
+  
+  const particles = Array.from({ length: particleCount }).map((_, i) => {
     const angle = Math.random() * 360;
-    const distance = 50 + Math.random() * 100; // Distance to travel
+    // More spread for higher intensity
+    const distance = 50 + Math.random() * (intensity > 1 ? 180 : 100); 
     const tx = `${Math.cos(angle * Math.PI / 180) * distance}px`;
     const ty = `${Math.sin(angle * Math.PI / 180) * distance}px`;
-    const color = Math.random() > 0.5 ? '#fbbf24' : '#ffffff'; // Gold or White
-    const size = 3 + Math.random() * 4;
+    
+    // Colors: Gold dominant for big wins, White for normal
+    let color = '#ffffff';
+    if (intensity > 1) {
+      const rand = Math.random();
+      if (rand > 0.6) color = '#fbbf24'; // Gold
+      else if (rand > 0.3) color = '#22d3ee'; // Cyan (Cyber hint)
+    } else {
+      if (Math.random() > 0.5) color = '#fbbf24';
+    }
+
+    const size = (3 + Math.random() * 4) * (intensity > 1 ? 1.5 : 1);
+    const delay = Math.random() * 0.2;
     
     return (
       <div 
@@ -27,7 +42,8 @@ const WinParticles = () => {
           backgroundColor: color,
           '--tx': tx,
           '--ty': ty,
-          animationDelay: `${Math.random() * 0.1}s`
+          animationDelay: `${delay}s`,
+          boxShadow: intensity > 1 ? `0 0 10px ${color}` : 'none'
         } as React.CSSProperties}
       />
     );
@@ -36,7 +52,12 @@ const WinParticles = () => {
   return <>{particles}</>;
 };
 
-export const RouletteWheel: React.FC<RouletteWheelProps> = ({ targetNumber, isSpinning, onSpinComplete }) => {
+export const RouletteWheel: React.FC<RouletteWheelProps> = ({ 
+  targetNumber, 
+  isSpinning, 
+  onSpinComplete,
+  winIntensity = 0
+}) => {
   const [rotation, setRotation] = useState(0);
   const [showEffects, setShowEffects] = useState(false);
   const radius = 150;
@@ -92,6 +113,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ targetNumber, isSp
           stroke={isWinner ? "#fff" : "#fbbf24"} 
           strokeWidth={isWinner ? "3" : "1"}
           className="transition-all"
+          style={{ filter: isWinner ? 'brightness(1.2)' : 'none' }}
         />
         {/* Text Number */}
         <text 
@@ -137,10 +159,15 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({ targetNumber, isSp
         <div className="w-full h-full bg-gradient-to-b from-gray-100 to-gray-400 clip-path-polygon" style={{ clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)' }}></div>
       </div>
 
-      {/* Particles container - centered at the top where the pointer is */}
+      {/* Victory Effects Container */}
       {showEffects && (
         <div className="absolute top-0 left-1/2 z-30 w-0 h-0">
-          <WinParticles />
+          <WinParticles intensity={winIntensity} />
+          
+          {/* Ring Shockwave for wins */}
+          {winIntensity > 0 && (
+             <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-yellow-400 animate-shockwave"></div>
+          )}
         </div>
       )}
     </div>
