@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { GameHistory, PlacedBet, BetType } from "../types";
 
 // Initialize the client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: 'AIzaSyDz4Mat41_0omZ1rCqh3q6jJi-K-Q480FQ' });
 
 // Helper to summarize bets for the AI
 const analyzeBets = (bets: PlacedBet[], totalBet: number) => {
@@ -119,46 +119,4 @@ export const getStrategicTip = async (
     const historyStr = history.slice(0, 15).map(h => h.number).join(', ');
 
     const prompt = `
-      You are the "Gemini Probability Engine", a sophisticated AI analyzing Roulette variance.
-      
-      [DATA STREAM]
-      Recent Outcomes: [${historyStr}]
-      Sample Size: ${totalSamples}
-      Distribution: Red ${redPct}% | Black ${blackPct}% | Green ${((greenCount/totalSamples)*100).toFixed(1)}%
-      Hot Number: ${hotNumber}
-      Player Balance: $${balance}
-
-      [INSTRUCTION]
-      Analyze the data for deviations from statistical probability (Gambler's Fallacy, Regression to Mean, Clustering).
-      
-      [OUTPUT FORMAT]
-      ANALYSIS: <Short technical observation, max 10 words>
-      SUGGESTION: <Specific bet recommendation>
-      CONFIDENCE: <0-100>%
-
-      [EXAMPLES]
-      ANALYSIS: Red is under-represented (-12% deviation).
-      SUGGESTION: Bet RED (Martingale advisable).
-      CONFIDENCE: 78%
-
-      ANALYSIS: Number ${hotNumber} shows anomalous clustering.
-      SUGGESTION: Bet Straight ${hotNumber}.
-      CONFIDENCE: 65%
-      
-      Return ONLY the formatted text. No conversational filler.
-    `;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        temperature: 0.5, // Low temp for robotic/math precision
-        maxOutputTokens: 100,
-      }
-    });
-
-    return response.text || "ANALYSIS: Insufficient data for projection.\nSUGGESTION: Bet Low/High.\nCONFIDENCE: 50%";
-  } catch (error) {
-    return "ANALYSIS: Data stream interrupted.\nSUGGESTION: Manual bet.\nCONFIDENCE: 0%";
-  }
-};
+      You are the "Gemini Probability
