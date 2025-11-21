@@ -415,9 +415,9 @@ const App: React.FC = () => {
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gradient-to-tr from-yellow-400 to-yellow-600 rounded-full shadow-lg shadow-yellow-500/20 animate-pulse"></div>
           <h1 className="hidden md:block text-lg md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500 tracking-widest uppercase">
-            Gemini Royale
+            Covies Casino
           </h1>
-          <h1 className="md:hidden text-lg font-black text-yellow-500 uppercase tracking-widest">GR</h1>
+          <h1 className="md:hidden text-lg font-black text-yellow-500 uppercase tracking-widest">CC</h1>
         </div>
         <div className="flex items-center gap-4">
            <button 
