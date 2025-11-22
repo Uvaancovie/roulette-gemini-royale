@@ -30,17 +30,17 @@ const ResultOverlay: React.FC<{ result: RoundResult | null, onClose: () => void 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
       <div className={`
-        relative p-1 rounded-2xl shadow-2xl transform scale-110 transition-all
+        relative p-1 rounded-2xl shadow-2xl transform scale-110 transition-all mx-4
         ${isWin ? 'bg-gradient-to-b from-yellow-500 to-yellow-700 animate-bounce-short' : 'bg-gradient-to-b from-red-900 to-gray-900 animate-shake-tilt'}
         ${isBigWin ? 'animate-gold-pulse' : ''}
       `}>
         <div className={`
-          rounded-xl p-8 text-center border min-w-[320px]
+          rounded-xl p-8 text-center border min-w-[280px] md:min-w-[320px]
           ${isWin ? 'bg-black border-yellow-400/50' : 'bg-gray-950 border-red-900/50'}
         `}>
           <div className="text-6xl mb-4">{isWin ? (isBigWin ? '🤑' : '🎉') : '💸'}</div>
           
-          <h2 className={`text-4xl font-bold mb-2 uppercase tracking-widest ${isWin ? 'text-white' : 'text-red-500'}`}>
+          <h2 className={`text-3xl md:text-4xl font-bold mb-2 uppercase tracking-widest ${isWin ? 'text-white' : 'text-red-500'}`}>
             {isWin ? 'You Won!' : 'You Lost'}
           </h2>
           
@@ -376,7 +376,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-felt-900 text-white flex flex-col font-sans relative overflow-x-hidden">
+    <div className="min-h-[100dvh] bg-felt-900 text-white flex flex-col font-sans relative overflow-x-hidden">
       <Toaster position="top-center" toastOptions={{
         style: {
           background: '#333',
@@ -386,7 +386,7 @@ const App: React.FC = () => {
       }} />
       
       {/* Background Texture */}
-      <div className="fixed inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/felt.png')]"></div>
+      <div className="fixed inset-0 opacity-10 pointer-events-none bg-repeat" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/felt.png')" }}></div>
 
       <ResultOverlay result={roundResult} onClose={() => setRoundResult(null)} />
       
@@ -443,7 +443,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Game Area */}
-      <main className="flex-1 p-2 md:p-4 flex flex-col items-center relative z-10 pb-32 md:pb-24">
+      <main className="flex-1 p-2 md:p-4 flex flex-col items-center relative z-10 pb-32 md:pb-24 w-full max-w-[100vw] overflow-x-hidden">
         
         <DealerChat 
           message={dealerMessage} 
@@ -456,7 +456,7 @@ const App: React.FC = () => {
           winAmount={winAmount}
         />
 
-        <div className="my-4 md:my-8 w-full flex justify-center scale-75 md:scale-100 transition-transform -mb-8 md:mb-0">
+        <div className="my-4 md:my-8 w-full flex justify-center transition-transform -mb-8 md:mb-0">
           <RouletteWheel 
             targetNumber={targetNumber} 
             isSpinning={isSpinning} 
@@ -467,7 +467,7 @@ const App: React.FC = () => {
 
         <div className="w-full max-w-5xl flex flex-col items-center gap-4">
           
-          <div className="flex flex-col items-center w-full">
+          <div className="flex flex-col items-center w-full px-2">
             <ChipSelector selectedChip={selectedChip} onSelect={setSelectedChip} />
             
             {/* Confirm Bet Toggle */}

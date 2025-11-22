@@ -134,7 +134,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
   });
 
   return (
-    <div className="relative w-[320px] h-[320px] mx-auto mb-8">
+    <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px] mx-auto mb-8 transition-all duration-300">
       {/* Outer Bezel */}
       <div className="absolute inset-0 rounded-full border-8 border-yellow-700 shadow-2xl bg-yellow-900"></div>
       

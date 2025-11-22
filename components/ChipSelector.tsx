@@ -20,20 +20,20 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({ selectedChip, onSele
   };
 
   return (
-    <div className="flex space-x-3 justify-center py-4 bg-felt-900/50 rounded-lg">
+    <div className="flex flex-wrap space-x-2 md:space-x-3 justify-center py-4 gap-y-2 bg-felt-900/50 rounded-lg max-w-full">
       {CHIP_VALUES.map((val) => (
         <button
           key={val}
           onClick={() => onSelect(val as ChipValue)}
           className={`
-            relative w-12 h-12 rounded-full flex items-center justify-center font-bold shadow-lg transition-transform transform hover:scale-110
+            relative w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold shadow-lg transition-transform transform hover:scale-110
             border-4 border-dashed 
             ${getChipColor(val)}
             ${selectedChip === val ? 'ring-4 ring-yellow-400 scale-110 z-10' : 'opacity-80 hover:opacity-100'}
           `}
         >
           <div className="absolute inset-0 rounded-full border-2 border-white/20"></div>
-          <span className="text-xs drop-shadow-md">{val}</span>
+          <span className="text-[10px] md:text-xs drop-shadow-md">{val}</span>
         </button>
       ))}
     </div>
