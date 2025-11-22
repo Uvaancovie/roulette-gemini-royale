@@ -2,7 +2,8 @@ import { GoogleGenAI } from "@google/genai";
 import { GameHistory, PlacedBet, BetType } from "../types";
 
 // Initialize the client
-const ai = new GoogleGenAI({ apiKey: 'AIzaSyDz4Mat41_0omZ1rCqh3q6jJi-K-Q480FQ' });
+// The API key is injected via vite.config.ts from environment variables
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Helper to summarize bets for the AI
 const analyzeBets = (bets: PlacedBet[], totalBet: number) => {

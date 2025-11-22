@@ -376,7 +376,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-felt-900 text-white flex flex-col font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-felt-900 text-white flex flex-col font-sans relative overflow-x-hidden">
       <Toaster position="top-center" toastOptions={{
         style: {
           background: '#333',
@@ -386,7 +386,7 @@ const App: React.FC = () => {
       }} />
       
       {/* Background Texture */}
-      <div className="fixed inset-0 opacity-10 pointer-events-none bg-repeat" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/felt.png')" }}></div>
+      <div className="fixed inset-0 opacity-10 pointer-events-none bg-repeat z-0" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/felt.png')" }}></div>
 
       <ResultOverlay result={roundResult} onClose={() => setRoundResult(null)} />
       
