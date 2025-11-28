@@ -29,6 +29,14 @@
 *   **State Management**: React Hooks
 *   **Icons/Fonts**: Google Fonts (Inter, JetBrains Mono)
 
+## 📖 Developer Guide
+
+For a detailed breakdown of the codebase structure, state management flow, and AI integration logic, please refer to:
+
+👉 **[ARCHITECTURE.md](./ARCHITECTURE.md)**
+
+This file provides the context needed for GitHub Copilot or new developers to understand the system architecture.
+
 ## 🚀 Getting Started
 
 ### Prerequisites
