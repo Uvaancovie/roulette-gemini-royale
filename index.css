@@ -25,9 +25,25 @@
   .backface-hidden {
     backface-visibility: hidden;
   }
+  .clip-path-polygon {
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+  }
+}
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  background-color: #0a2b18;
+  min-height: 100vh;
+  background-color: #0a2b18; /* Fallback for bg-felt-900 */
+}
+
+#root {
+  isolation: isolate;
+  min-height: 100vh;
 }
