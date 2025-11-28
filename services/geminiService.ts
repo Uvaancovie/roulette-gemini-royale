@@ -1,9 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GameHistory, PlacedBet, BetType } from "../types";
 
 // Initialize the client
 // The API key is injected via vite.config.ts from environment variables
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenerativeAI(process.env.VITE_GEMINI_API_KEY || '');
 
 // Helper to summarize bets for the AI
 const analyzeBets = (bets: PlacedBet[], totalBet: number) => {
@@ -81,16 +81,13 @@ export const getDealerCommentary = async (
       `;
     }
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        temperature: 0.9,
-        maxOutputTokens: 60,
-      }
-    });
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    return response.text || (phase === 'SPINNING' ? "Good luck!" : "Interesting result.");
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+
+    return response.text() || (phase === 'SPINNING' ? "Good luck!" : "Interesting result.");
   } catch (error) {
     console.error("Gemini API Error:", error);
     return phase === 'SPINNING' ? "No more bets..." : "The house always wins.";
@@ -149,16 +146,11 @@ export const getStrategicTip = async (
       Return ONLY the formatted text. No conversational filler.
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        temperature: 0.5, // Low temp for robotic/math precision
-        maxOutputTokens: 100,
-      }
-    });
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    return response.text || "ANALYSIS: Insufficient data for projection.\nSUGGESTION: Bet Low/High.\nCONFIDENCE: 50%";
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
   } catch (error) {
     return "ANALYSIS: Data stream interrupted.\nSUGGESTION: Manual bet.\nCONFIDENCE: 0%";
   }

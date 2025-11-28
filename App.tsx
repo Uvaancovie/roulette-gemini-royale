@@ -8,6 +8,7 @@ import { GameControls } from './components/GameControls';
 import { HistoryModal } from './components/HistoryModal';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { DealerCustomizationModal } from './components/DealerCustomizationModal';
+import { LoadingScreen } from './components/LoadingScreen';
 import { BetType, ChipValue, GameHistory, PlacedBet, DealerEmotion, DealerAvatarConfig } from './types';
 import { getNumberColor, getCoveredNumbers } from './constants';
 import { getDealerCommentary, getStrategicTip } from './services/geminiService';
@@ -99,6 +100,17 @@ const App: React.FC = () => {
   const [highlightedNumbers, setHighlightedNumbers] = useState<Set<number>>(new Set());
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  
+  // Loading State
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate initial loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // 2 second loading screen
+    return () => clearTimeout(timer);
+  }, []);
   
   // Win Animation State
   const [winIntensity, setWinIntensity] = useState(0);
@@ -375,6 +387,10 @@ const App: React.FC = () => {
     }, 5000);
   };
 
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="min-h-screen bg-felt-900 text-white flex flex-col font-sans relative overflow-x-hidden">
       <Toaster position="top-center" toastOptions={{
@@ -411,33 +427,39 @@ const App: React.FC = () => {
       />
 
       {/* Header */}
-      <header className="px-4 py-3 bg-black/60 flex justify-between items-center border-b border-white/10 backdrop-blur-md sticky top-0 z-50 shadow-lg">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-tr from-yellow-400 to-yellow-600 rounded-full shadow-lg shadow-yellow-500/20 animate-pulse"></div>
-          <h1 className="hidden md:block text-lg md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500 tracking-widest uppercase">
-            Covies Casino
-          </h1>
-          <h1 className="md:hidden text-lg font-black text-yellow-500 uppercase tracking-widest">CC</h1>
-        </div>
-        <div className="flex items-center gap-4">
-           <button 
-            onClick={() => setIsAvatarModalOpen(true)}
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-gray-300 hover:text-yellow-400 border border-white/10"
-            title="Customize Dealer"
-          >
-            ⚙️
-          </button>
-          <button 
-            onClick={() => setIsHistoryOpen(true)}
-            className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-xs md:text-sm text-gray-300 hover:text-white"
-          >
-            <span>📜</span> <span className="hidden md:inline">History</span>
-          </button>
-          <div className="text-right bg-black/50 px-4 py-1 rounded-lg border border-white/10 shadow-inner">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider">Balance</p>
-            <p className="text-lg md:text-xl font-mono font-bold text-green-400 drop-shadow-sm">
-              ${balance.toLocaleString()}
-            </p>
+      <header className="px-4 py-3 bg-gradient-to-r from-black via-gray-900 to-black backdrop-blur-md sticky top-0 z-50 shadow-2xl shadow-yellow-500/10 border-b border-yellow-500/20">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-tr from-yellow-400 to-yellow-600 rounded-full shadow-lg shadow-yellow-500/20 flex items-center justify-center">
+              <span className="text-xl">🎰</span>
+            </div>
+            <div>
+              <h1 className="hidden md:block text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500 tracking-widest uppercase">
+                Covies Casino
+              </h1>
+              <h1 className="md:hidden text-lg font-black text-yellow-500 uppercase tracking-widest">CC</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsAvatarModalOpen(true)}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 transition-all duration-200 text-gray-300 hover:text-yellow-400 border border-white/10 hover:border-yellow-400/50"
+              title="Customize Dealer"
+            >
+              ⚙️
+            </button>
+            <button 
+              onClick={() => setIsHistoryOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 hover:bg-white/10 transition-all duration-200 text-xs md:text-sm text-gray-300 hover:text-white border border-white/10 hover:border-white/20"
+            >
+              <span>📜</span> <span className="hidden md:inline">History</span>
+            </button>
+            <div className="bg-black/50 px-4 py-2 rounded-lg border border-white/10 shadow-inner backdrop-blur-sm">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider">Balance</p>
+              <p className="text-lg md:text-xl font-mono font-bold text-green-400 drop-shadow-sm">
+                ${balance.toLocaleString()}
+              </p>
+            </div>
           </div>
         </div>
       </header>

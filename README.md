@@ -73,7 +73,7 @@
 3.  **Configure Environment**
     Create a `.env` file in the root directory:
     ```env
-    API_KEY=your_actual_api_key_here
+    VITE_GEMINI_API_KEY=your_actual_api_key_here
     ```
 
 4.  **Run Locally**
@@ -94,11 +94,11 @@ This project is optimized for Vercel deployment.
 3.  Import your repository.
 4.  **Environment Variables**:
     *   In the Vercel project settings, add a new variable:
-    *   Name: `API_KEY`
+    *   Name: `VITE_GEMINI_API_KEY`
     *   Value: `your_google_gemini_api_key`
 5.  Click **Deploy**.
 
-*Note: The `vite.config.ts` is already configured to expose `process.env.API_KEY` to the client-side application during the build process.*
+*Note: The `vite.config.ts` is already configured to expose `process.env.VITE_GEMINI_API_KEY` to the client-side application during the build process.*
 
 ---
 

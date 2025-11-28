@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
       port: 3000
     },
     define: {
-      'process.env.API_KEY': JSON.stringify(env.API_KEY)
+      'process.env.VITE_API_KEY': JSON.stringify(env.VITE_API_KEY)
     }
   };
 });
