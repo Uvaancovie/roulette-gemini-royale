@@ -6,10 +6,14 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     server: {
-      port: 3000
+      port: 3000,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5003',
+          changeOrigin: true,
+        }
+      }
     },
-    define: {
-      'process.env.VITE_API_KEY': JSON.stringify(env.VITE_API_KEY)
-    }
+    // Remove the define block for VITE_API_KEY so it's not exposed to client
   };
 });

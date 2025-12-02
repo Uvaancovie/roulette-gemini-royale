@@ -25,13 +25,22 @@ export const BettingBoard: React.FC<BettingBoardProps> = ({
       .reduce((sum, b) => sum + b.amount, 0);
   };
 
-  // Helper to render a chip if bet exists
+  // Helper to render a chip if bet exists - ENHANCED
   const renderChip = (amount: number) => {
     if (amount === 0) return null;
+    const displayAmount = amount >= 1000 ? (amount/1000).toFixed(1) + 'K' : amount;
     return (
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 animate-bounce-short">
-        <div className="w-5 h-5 md:w-7 md:h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 border-2 border-dashed border-white text-white text-[10px] md:text-xs font-bold flex items-center justify-center shadow-black/50 shadow-lg transform -translate-y-1">
-          {amount >= 1000 ? (amount/1000).toFixed(1) + 'k' : amount}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 chip-drop">
+        <div className="relative">
+          {/* Chip glow */}
+          <div className="absolute inset-0 bg-yellow-400/30 blur-md rounded-full scale-125"></div>
+          {/* Chip body */}
+          <div className="relative w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-700 border-3 border-yellow-200 text-black text-[10px] md:text-xs lg:text-sm font-black flex items-center justify-center shadow-2xl shadow-yellow-600/50 transform hover:scale-110 transition-transform">
+            {/* Inner ring */}
+            <div className="absolute inset-1 rounded-full border-2 border-yellow-100/40"></div>
+            {/* Amount */}
+            <span className="relative z-10 drop-shadow-sm">R{displayAmount}</span>
+          </div>
         </div>
       </div>
     );
@@ -39,24 +48,24 @@ export const BettingBoard: React.FC<BettingBoardProps> = ({
 
   const getCellClass = (num: number, isZero = false) => {
      const isHighlighted = highlightedNumbers.has(num);
-     const base = "relative flex items-center justify-center font-bold text-white cursor-pointer transition-all duration-200 select-none h-10 md:h-14 border border-felt-800/30";
+     const base = "relative flex items-center justify-center font-bold text-white cursor-pointer transition-all duration-200 select-none h-11 md:h-14 lg:h-16 border border-felt-800/40 hover-lift";
      
      let bg = '';
-     if (isZero) bg = 'bg-gradient-to-br from-green-600 to-green-800';
-     else if (RED_NUMBERS.has(num)) bg = 'bg-gradient-to-br from-red-600 to-red-800';
-     else bg = 'bg-gradient-to-br from-gray-800 to-black';
+     if (isZero) bg = 'bg-gradient-to-br from-green-500 via-green-600 to-green-800';
+     else if (RED_NUMBERS.has(num)) bg = 'bg-gradient-to-br from-red-500 via-red-600 to-red-800';
+     else bg = 'bg-gradient-to-br from-gray-700 via-gray-900 to-black';
 
      if (isHighlighted) {
-       return `${base} ${bg} brightness-150 ring-inset ring-2 ring-yellow-400 z-10 scale-[1.02] shadow-[0_0_15px_rgba(250,204,21,0.5)]`;
+       return `${base} ${bg} brightness-150 ring-inset ring-2 md:ring-3 ring-yellow-400 z-10 scale-[1.03] shadow-[0_0_20px_rgba(250,204,21,0.6)] number-pop`;
      }
      
-     return `${base} ${bg} hover:brightness-110 opacity-90 hover:opacity-100`;
+     return `${base} ${bg} hover:brightness-125 hover:scale-[1.02] opacity-95 hover:opacity-100 active:scale-95`;
   };
 
   const getLabelClass = (isActive: boolean) => {
-     const base = "relative flex items-center justify-center font-bold text-[10px] md:text-sm text-white cursor-pointer transition-all duration-200 border border-felt-800/30 select-none h-8 md:h-12 uppercase tracking-tighter md:tracking-normal";
+     const base = "relative flex items-center justify-center font-bold text-[10px] md:text-sm lg:text-base text-white cursor-pointer transition-all duration-200 border border-felt-800/40 select-none h-9 md:h-12 lg:h-14 uppercase tracking-tight md:tracking-normal hover-lift";
      if (isActive) {
-         return `${base} bg-white/20 ring-inset ring-2 ring-yellow-400 z-10`;
+         return `${base} bg-gradient-to-br from-white/20 to-white/10 ring-inset ring-2 md:ring-3 ring-yellow-400 z-10 brightness-125`;
      }
      return `${base} bg-green-900/40 hover:bg-white/10`;
   };
@@ -70,40 +79,50 @@ export const BettingBoard: React.FC<BettingBoardProps> = ({
   };
 
   return (
-    <div className="overflow-x-auto pb-8 pt-2 w-full flex justify-start md:justify-center scrollbar-hide px-4">
-      <div className="min-w-[340px] md:min-w-[600px] max-w-4xl bg-felt-900 border-4 md:border-8 border-yellow-900/50 rounded-xl shadow-2xl p-1 md:p-3 relative shrink-0">
+    <div className="overflow-x-auto pb-6 pt-2 w-full flex justify-start md:justify-center scrollbar-hide px-2 md:px-4">
+      <div className="min-w-[360px] sm:min-w-[420px] md:min-w-[600px] lg:min-w-[700px] max-w-5xl bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 border-4 md:border-6 lg:border-8 border-yellow-900/60 rounded-2xl shadow-2xl p-2 md:p-3 lg:p-4 relative shrink-0 hover-lift">
         {/* Felt Texture Overlay */}
-        <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] pointer-events-none rounded-lg"></div>
+        <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] pointer-events-none rounded-xl mix-blend-multiply"></div>
+        
+        {/* Corner Decorations */}
+        <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-yellow-500/50"></div>
+        <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-yellow-500/50"></div>
+        <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-yellow-500/50"></div>
+        <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-yellow-500/50"></div>
+        
+        {/* Ambient glow when hovered */}
+        <div className="absolute inset-0 bg-yellow-500/0 group-hover:bg-yellow-500/5 transition-all duration-500 rounded-xl pointer-events-none"></div>
         
         <div className="flex relative z-10">
-          {/* 0 (Zero) */}
+          {/* 0 (Zero) - Enhanced */}
           <div 
-            className={`${getCellClass(0, true)} w-8 md:w-16 rounded-l-md border-r-2 border-white/10`}
+            className={`${getCellClass(0, true)} w-10 md:w-16 lg:w-20 rounded-l-xl border-r-2 border-green-400/30 shadow-inner text-lg md:text-2xl lg:text-3xl font-black`}
             style={{ height: 'auto' }} // Spans all rows
             onClick={() => onPlaceBet(BetType.STRAIGHT, 0, 35)}
             onMouseEnter={() => handleEnter(BetType.STRAIGHT, 0)}
             onMouseLeave={handleLeave}
           >
-            <span className="-rotate-90 text-sm md:text-base">0</span>
+            <span className="-rotate-90 drop-shadow-lg">0</span>
             {renderChip(getBetAmount(BetType.STRAIGHT, 0))}
           </div>
 
           <div className="flex-1 flex flex-col">
-            {/* Numbers Grid - Top Row (3, 6, 9...) actually appears top on board */}
-            <div className="grid grid-cols-12 grid-rows-3">
+            {/* Numbers Grid - Enhanced spacing and typography */}
+            <div className="grid grid-cols-12 grid-rows-3 gap-0">
               {/* Row 3 (3, 6, 9...) */}
               {[3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36].map(n => (
                 <div 
                   key={n} 
-                  className={getCellClass(n)}
+                  className={`${getCellClass(n)} text-sm md:text-lg lg:text-xl font-black`}
                   onClick={() => onPlaceBet(BetType.STRAIGHT, n, 35)}
                   onMouseEnter={() => handleEnter(BetType.STRAIGHT, n)}
                   onMouseLeave={handleLeave}
                 >
-                  {n}
+                  <span className="drop-shadow-md">{n}</span>
                   {renderChip(getBetAmount(BetType.STRAIGHT, n))}
                 </div>
               ))}
+              
               {/* Row 2 (2, 5, 8...) */}
               {[2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35].map(n => (
                 <div 

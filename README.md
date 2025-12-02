@@ -74,9 +74,16 @@
     Create a `.env` file in the root directory:
     ```env
     VITE_GEMINI_API_KEY=your_actual_api_key_here
+    MONGO_URI=your_mongodb_connection_string
     ```
 
-4.  **Run Locally**
+4.  **Start the Backend Server**
+    ```bash
+    npm run server
+    ```
+    This starts the Express server on port 5000.
+
+5.  **Start the Frontend (in a new terminal)**
     ```bash
     npm run dev
     ```
@@ -107,10 +114,10 @@ This project is optimized for Vercel deployment.
 For a deep dive into the code structure, state management, and AI prompt engineering, please consult the **[ARCHITECTURE.md](./ARCHITECTURE.md)** file.
 
 **Key Technologies:**
-*   **Vite**: Fast tooling and bundling.
-*   **React 18**: Component-based UI logic.
-*   **Tailwind CSS**: Utility-first styling.
-*   **@google/genai**: Direct SDK integration for AI features.
+*   **Frontend**: Vite, React 18, TypeScript, Tailwind CSS
+*   **Backend**: Node.js, Express, MongoDB, Mongoose
+*   **AI**: Google Gemini API (server-side proxy)
+*   **Security**: Server-side RNG, API key protection
 
 ---
 

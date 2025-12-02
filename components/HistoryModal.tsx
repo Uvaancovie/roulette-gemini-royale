@@ -63,10 +63,10 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, his
                         {entry.winningNumber}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-300 text-right font-mono">${entry.totalBet}</td>
-                    <td className="px-4 py-3 text-yellow-500 font-bold text-right font-mono">${entry.totalWon}</td>
+                    <td className="px-4 py-3 text-gray-300 text-right font-mono">R{entry.totalBet}</td>
+                    <td className="px-4 py-3 text-yellow-500 font-bold text-right font-mono">R{entry.totalWon}</td>
                     <td className={`px-4 py-3 text-right font-bold font-mono ${entry.netResult >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {entry.netResult >= 0 ? '+' : ''}{entry.netResult}
+                      {entry.netResult >= 0 ? '+' : ''}R{entry.netResult}
                     </td>
                   </tr>
                 ))}
@@ -79,7 +79,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, his
           <p className="text-xs text-gray-500">
             Total Spins: <span className="text-white font-bold">{history.length}</span> | 
             Net Profit: <span className={`${history.reduce((acc, curr) => acc + curr.netResult, 0) >= 0 ? 'text-green-400' : 'text-red-400'} font-bold`}>
-              ${history.reduce((acc, curr) => acc + curr.netResult, 0)}
+              R{history.reduce((acc, curr) => acc + curr.netResult, 0)}
             </span>
           </p>
         </div>
