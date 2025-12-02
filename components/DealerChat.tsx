@@ -27,9 +27,10 @@ export const DealerChat: React.FC<DealerChatProps> = ({
   // Use a safe default if avatarConfig not provided
   const config: DealerAvatarConfig = avatarConfig ?? { type: 'PRESET', presetId: 'classic' };
 
-  // Calculate win/loss states
-  const isBigWin = winAmount > 500; // Consider wins over R500 as big wins
-  const isLoss = winAmount < 0;
+  // Calculate win/loss states (use a safe local value because winAmount can be null)
+  const safeWinAmount = winAmount ?? 0; // default to 0 if null
+  const isBigWin = safeWinAmount > 500; // Consider wins over R500 as big wins
+  const isLoss = safeWinAmount < 0;
 
   const renderAvatar = () => {
     if (config.type === 'UPLOAD' && config.customSrc) {
