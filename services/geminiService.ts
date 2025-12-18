@@ -1,4 +1,5 @@
 import { GameHistory, PlacedBet, BetType } from "../types";
+import { getApiUrl } from "../config/api";
 
 // Helper to summarize bets for the AI
 const analyzeBets = (bets: PlacedBet[], totalBet: number) => {
@@ -86,7 +87,7 @@ export const getDealerCommentary = async (
     }
 
     // Use backend API instead of direct Gemini
-    const response = await fetch('/api/chat', {
+    const response = await fetch(getApiUrl('/api/chat'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -156,7 +157,7 @@ export const getStrategicTip = async (
     `;
 
     // Use backend API instead of direct Gemini
-    const response = await fetch('/api/chat', {
+    const response = await fetch(getApiUrl('/api/chat'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

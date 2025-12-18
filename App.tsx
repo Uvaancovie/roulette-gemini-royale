@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { getApiUrl } from './config/api';
 import { RouletteWheel } from './components/RouletteWheel';
 import { BettingBoard } from './components/BettingBoard';
 import { ChipSelector } from './components/ChipSelector';
@@ -136,7 +137,7 @@ const App: React.FC = () => {
         try {
           const userData = JSON.parse(storedUser);
           // Verify token is still valid by fetching user data
-          const response = await fetch('/api/user', {
+          const response = await fetch(getApiUrl('/api/user'), {
             headers: {
               'Authorization': `Bearer ${storedToken}`
             }
@@ -318,7 +319,7 @@ const App: React.FC = () => {
     
     try {
       // Call the backend
-      const response = await fetch('/api/spin', {
+      const response = await fetch(getApiUrl('/api/spin'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

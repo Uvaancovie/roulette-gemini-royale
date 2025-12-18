@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiUrl } from '../config/api';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, onClose
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch(getApiUrl('/api/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

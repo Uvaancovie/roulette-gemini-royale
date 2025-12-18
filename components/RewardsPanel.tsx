@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { getApiUrl } from '../config/api';
 
 interface RewardsPanelProps {
   isOpen: boolean;
@@ -33,7 +34,7 @@ export const RewardsPanel: React.FC<RewardsPanelProps> = ({
     setDailyMessage('');
 
     try {
-      const response = await fetch('/api/daily-bonus', {
+      const response = await fetch(getApiUrl('/api/daily-bonus'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +74,7 @@ export const RewardsPanel: React.FC<RewardsPanelProps> = ({
 
     // Claim reward
     try {
-      const response = await fetch('/api/share-reward', {
+      const response = await fetch(getApiUrl('/api/share-reward'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

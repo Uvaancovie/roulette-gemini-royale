@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../config/api';
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -59,7 +60,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
     if (!username) return;
     setIsLoading(true);
     try {
-      const response = await fetch('/api/user', {
+      const response = await fetch(getApiUrl('/api/user'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
@@ -117,7 +118,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
     
     setIsLoading(true);
     try {
-      const response = await fetch('/api/user/profile', {
+      const response = await fetch(getApiUrl('/api/user/profile'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
