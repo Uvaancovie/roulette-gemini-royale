@@ -3,9 +3,11 @@
  * Handles API base URL for different environments
  */
 
-// In production (Vercel), API routes are served from the same origin
-// In development, they need to point to the local server
-export const API_BASE_URL = import.meta.env.PROD ? '' : 'http://localhost:5003';
+// In production, use the Render backend URL
+// In development, use local server
+export const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://covies-casino-api.onrender.com' 
+  : 'http://localhost:5003';
 
 // Helper to build full API URL
 export const getApiUrl = (endpoint: string) => {
