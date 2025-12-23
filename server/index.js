@@ -10,30 +10,30 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration - More permissive for production
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'https://roulette-gemini-royale.vercel.app',
-    'https://covies-casino.vercel.app'
-  ];
-  
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
+// CORS configuration — allow only known frontend origins and handle preflight
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://roulette-gemini-royale.vercel.app',
+  'https://covies-casino.vercel.app'
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser requests (no origin) and known origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
