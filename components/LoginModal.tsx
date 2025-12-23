@@ -240,46 +240,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onLogin, onClose
             </button>
           </div>
 
-          {/* Referral Code Section - Only for registration */}
-          {!isLogin && (
-            <div className="mb-6">
-              {!showReferral ? (
-                <button
-                  type="button"
-                  onClick={() => setShowReferral(true)}
-                  className="text-sm text-yellow-500 hover:text-yellow-400 transition-colors"
-                >
-                  🎁 Have a referral code?
-                </button>
-              ) : (
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-400 uppercase tracking-wider">Referral Code (Optional)</label>
-                  <input
-                    type="text"
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                    placeholder="Enter code for bonus!"
-                    className="w-full px-4 py-3 bg-black/50 border border-green-600/50 rounded-lg text-white placeholder-gray-500 focus:border-green-400 focus:outline-none transition-colors"
-                    disabled={isLoading}
-                  />
-                  <p className="text-xs text-green-400">+R1,000 + 5 extra free spins!</p>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Referral Code Section - Removed as per request */}
 
-          <div className="flex gap-3 mb-4">
+
+          <div className="flex gap-2 mb-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              className="flex-1 px-2 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors"
               disabled={isLoading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold rounded-lg transition-all disabled:opacity-50"
+              className="flex-1 px-2 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black text-sm font-bold rounded-lg transition-all disabled:opacity-50"
               disabled={isLoading || !email.trim() || !password.trim() || (!isLogin && (!username.trim() || !age.trim() || !country.trim()))}
             >
               {isLoading ? 'Processing...' : (isLogin ? 'Login' : 'Register')}

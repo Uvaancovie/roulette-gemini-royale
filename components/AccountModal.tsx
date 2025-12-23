@@ -4,6 +4,7 @@ import { getApiUrl } from '../config/api';
 interface AccountModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCancel?: () => void;
   username: string | null;
 }
 
@@ -43,7 +44,7 @@ const VIP_BADGES = ['🥉', '🥈', '🥇', '💎', '👑'];
 const VIP_NAMES = ['Bronze', 'Silver', 'Gold', 'Diamond', 'Royal'];
 const VIP_COLORS = ['text-gray-400', 'text-gray-300', 'text-yellow-400', 'text-blue-400', 'text-purple-400'];
 
-export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, username }) => {
+export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onCancel, username }) => {
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -113,6 +114,16 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
     setEditForm({});
   };
 
+  const handleBackToLogin = () => {
+    setIsEditing(false);
+    setEditForm({});
+    if (onCancel) {
+      onCancel();
+    } else {
+      onClose();
+    }
+  };
+
   const saveProfile = async () => {
     if (!editForm) return;
     
@@ -158,46 +169,50 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={handleBackToLogin}>
       <div
-        className="bg-gradient-to-b from-gray-900 to-black p-6 rounded-2xl border border-yellow-400/30 shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+        className="bg-gradient-to-b from-gray-900 to-black rounded-2xl border border-yellow-400/30 shadow-2xl w-full sm:w-full md:max-w-2xl mx-2 sm:mx-4 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-            👤 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">Account Overview</span>
-          </h2>
-          <p className="text-gray-400 text-sm mt-1">🇿🇦 {username}'s Casino Stats</p>
+        {/* Header - Fixed */}
+        <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 flex-shrink-0">
+          <div className="text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-white flex flex-col sm:flex-row items-center justify-center gap-2">
+              👤 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">Account Overview</span>
+            </h2>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1">🇿🇦 {username}'s Casino Stats</p>
+          </div>
         </div>
 
-        {isLoading ? (
-          <div className="text-center py-8 text-gray-500">Loading account data...</div>
-        ) : userStats ? (
-          <div className="space-y-6">
+        {/* Scrollable Content */}
+        <div className="overflow-y-auto scroll-smooth flex-1 px-4 sm:px-6 [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-black/60 [&::-webkit-scrollbar-thumb]:bg-yellow-500/60 [&::-webkit-scrollbar-thumb]:rounded-lg hover:[&::-webkit-scrollbar-thumb]:bg-yellow-400/80">
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-500">Loading account data...</div>
+          ) : userStats ? (
+            <div className="space-y-6 pb-4">
             {/* Profile Information */}
-            <div className="bg-gradient-to-r from-blue-900/30 to-cyan-600/20 p-4 rounded-xl border border-cyan-500/30">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-white">👤 Profile Information</h3>
+            <div className="bg-gradient-to-r from-blue-900/30 to-cyan-600/20 p-3 sm:p-4 rounded-xl border border-cyan-500/30">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+                <h3 className="text-base sm:text-lg font-bold text-white">👤 Profile Information</h3>
                 {!isEditing ? (
                   <button
                     onClick={startEditing}
-                    className="px-3 py-1 bg-cyan-600 hover:bg-cyan-700 text-white text-sm rounded transition-colors"
+                    className="px-2 py-1 bg-cyan-600 hover:bg-cyan-700 text-white text-xs sm:text-sm rounded transition-colors whitespace-nowrap"
                   >
-                    Edit Profile
+                    Edit
                   </button>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex gap-1 sm:gap-2 w-full sm:w-auto">
                     <button
                       onClick={cancelEditing}
-                      className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded transition-colors"
+                      className="flex-1 sm:flex-none px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={saveProfile}
                       disabled={isLoading}
-                      className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors disabled:opacity-50"
+                      className="flex-1 sm:flex-none px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors disabled:opacity-50"
                     >
                       {isLoading ? 'Saving...' : 'Save'}
                     </button>
@@ -207,45 +222,45 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
 
               {isEditing ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">Username</label>
+                      <label className="block text-xs sm:text-sm text-gray-400 mb-1">Username</label>
                       <input
                         type="text"
                         value={editForm.username || ''}
                         onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                        className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded text-white text-sm focus:border-cyan-400 focus:outline-none"
+                        className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded text-white text-xs sm:text-sm focus:border-cyan-400 focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">Age</label>
+                      <label className="block text-xs sm:text-sm text-gray-400 mb-1">Age</label>
                       <input
                         type="number"
                         value={editForm.age || ''}
                         onChange={(e) => setEditForm(prev => ({ ...prev, age: parseInt(e.target.value) }))}
-                        className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded text-white text-sm focus:border-cyan-400 focus:outline-none"
+                        className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded text-white text-xs sm:text-sm focus:border-cyan-400 focus:outline-none"
                         min="18"
                         max="120"
                       />
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">Country</label>
+                      <label className="block text-xs sm:text-sm text-gray-400 mb-1">Country</label>
                       <input
                         type="text"
                         value={editForm.country || ''}
                         onChange={(e) => setEditForm(prev => ({ ...prev, country: e.target.value }))}
-                        className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded text-white text-sm focus:border-cyan-400 focus:outline-none"
+                        className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded text-white text-xs sm:text-sm focus:border-cyan-400 focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">Gender</label>
+                      <label className="block text-xs sm:text-sm text-gray-400 mb-1">Gender</label>
                       <select
                         value={editForm.gender || 'prefer-not-to-say'}
                         onChange={(e) => setEditForm(prev => ({ ...prev, gender: e.target.value }))}
-                        className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded text-white text-sm focus:border-cyan-400 focus:outline-none"
+                        className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded text-white text-xs sm:text-sm focus:border-cyan-400 focus:outline-none"
                       >
                         <option value="prefer-not-to-say">Prefer not to say</option>
                         <option value="male">Male</option>
@@ -256,8 +271,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-400 mb-2">Betting Preferences</label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <label className="block text-xs sm:text-sm text-gray-400 mb-2">Betting Preferences</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <select
                         value={editForm.bettingPreferences?.favoriteBetType || 'RED'}
                         onChange={(e) => setEditForm(prev => ({
@@ -318,7 +333,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
                 </div>
               ) : userProfile ? (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
                     <div>
                       <span className="text-gray-400">Username:</span>
                       <span className="text-white ml-2">{userProfile.username}</span>
@@ -350,8 +365,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
             </div>
 
             {/* VIP Status & Basic Info */}
-            <div className="bg-gradient-to-r from-yellow-900/30 to-yellow-600/20 p-4 rounded-xl border border-yellow-500/30">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-gradient-to-r from-yellow-900/30 to-yellow-600/20 p-3 sm:p-4 rounded-xl border border-yellow-500/30">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4">
                 <div className="flex items-center gap-3">
                   <span className="text-4xl">{VIP_BADGES[userStats.vipLevel - 1] || '🥉'}</span>
                   <div>
@@ -370,7 +385,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
               </div>
 
               {/* Key Stats Row */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-400">R{userStats.balance.toLocaleString()}</div>
                   <div className="text-xs text-gray-400 uppercase tracking-wider">Balance</div>
@@ -491,14 +506,17 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, use
         ) : (
           <div className="text-center py-8 text-red-400">Failed to load account data</div>
         )}
+        </div>
 
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="w-full mt-6 py-3 bg-white/5 hover:bg-white/10 text-gray-400 rounded-lg transition-colors font-bold uppercase tracking-wider text-sm"
-        >
-          Close
-        </button>
+        {/* Back to Login Button - Fixed */}
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 flex-shrink-0 border-t border-white/10">
+          <button
+            onClick={handleBackToLogin}
+            className="w-full mt-4 sm:mt-6 py-2 sm:py-3 bg-white/5 hover:bg-white/10 text-gray-400 rounded-lg transition-colors font-bold uppercase tracking-wider text-xs sm:text-sm"
+          >
+            Back to Login
+          </button>
+        </div>
       </div>
     </div>
   );
