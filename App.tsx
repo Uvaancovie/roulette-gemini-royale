@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, Suspense, lazy } from 'react';
 import { getApiUrl } from './config/api';
 import { RouletteWheel } from './components/RouletteWheel';
 import { BettingBoard } from './components/BettingBoard';
@@ -6,18 +6,20 @@ import { ChipSelector } from './components/ChipSelector';
 import { StatsPanel } from './components/StatsPanel';
 import { DealerChat } from './components/DealerChat';
 import { GameControls } from './components/GameControls';
-import { HistoryModal } from './components/HistoryModal';
-import { ConfirmationModal } from './components/ConfirmationModal';
 import { LoadingScreen } from './components/LoadingScreen';
-import { LoginModal } from './components/LoginModal';
-import { LeaderboardModal } from './components/LeaderboardModal';
-import { RewardsPanel } from './components/RewardsPanel';
-import { AccountModal } from './components/AccountModal';
-import { BetAnalysisChat } from './components/BetAnalysisChat';
 import { BetType, ChipValue, GameHistory, PlacedBet, DealerEmotion } from './types';
 import { getNumberColor, getCoveredNumbers } from './constants';
 import { getDealerCommentary } from './services/geminiService';
 import { Toaster, toast } from 'react-hot-toast';
+
+// Lazy load non-critical components
+const HistoryModal = lazy(() => import('./components/HistoryModal').then(module => ({ default: module.HistoryModal })));
+const ConfirmationModal = lazy(() => import('./components/ConfirmationModal').then(module => ({ default: module.ConfirmationModal })));
+const LoginModal = lazy(() => import('./components/LoginModal').then(module => ({ default: module.LoginModal })));
+const LeaderboardModal = lazy(() => import('./components/LeaderboardModal').then(module => ({ default: module.LeaderboardModal })));
+const RewardsPanel = lazy(() => import('./components/RewardsPanel').then(module => ({ default: module.RewardsPanel })));
+const AccountModal = lazy(() => import('./components/AccountModal').then(module => ({ default: module.AccountModal })));
+const BetAnalysisChat = lazy(() => import('./components/BetAnalysisChat').then(module => ({ default: module.BetAnalysisChat })));
 
 interface RoundResult {
   totalBet: number;
@@ -447,19 +449,23 @@ const App: React.FC = () => {
   }
 
   if (!user) {
-    return <LoginModal
-      isOpen={true}
-      onLogin={(token, userData) => {
-        setAuthToken(token);
-        setUser(userData);
-        setBalance(userData.balance);
-        setFreeSpins(userData.freeSpins || 0);
-        setReferralCode(userData.referralCode || '');
-        setVipLevel(userData.vipLevel || 1);
-        setHistory(userData.history.map((h: any) => ({ number: h.result, color: getNumberColor(h.result) })));
-      }}
-      onClose={() => {}}
-    />;
+    return (
+      <Suspense fallback={<LoadingScreen />}>
+        <LoginModal
+          isOpen={true}
+          onLogin={(token: string, userData: any) => {
+            setAuthToken(token);
+            setUser(userData);
+            setBalance(userData.balance);
+            setFreeSpins(userData.freeSpins || 0);
+            setReferralCode(userData.referralCode || '');
+            setVipLevel(userData.vipLevel || 1);
+            setHistory(userData.history.map((h: any) => ({ number: h.result, color: getNumberColor(h.result) })));
+          }}
+          onClose={() => {}}
+        />
+      </Suspense>
+    );
   }
 
   return (
@@ -477,52 +483,54 @@ const App: React.FC = () => {
 
       <ResultOverlay result={roundResult} onClose={() => setRoundResult(null)} />
       
-      <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} history={sessionHistory} />
-      
-      <LeaderboardModal 
-        isOpen={isLeaderboardOpen} 
-        onClose={() => setIsLeaderboardOpen(false)} 
-        currentUsername={user?.username}
-      />
-      
-      <RewardsPanel 
-        isOpen={isRewardsOpen} 
-        onClose={() => setIsRewardsOpen(false)}
-        username={user?.username}
-        freeSpins={freeSpins}
-        referralCode={referralCode}
-        vipLevel={vipLevel}
-        onRewardClaimed={(newBalance, newFreeSpins) => {
-          setBalance(newBalance);
-          setFreeSpins(newFreeSpins);
-        }}
-      />
-      
-      <AccountModal 
-        isOpen={isAccountOpen} 
-        onClose={() => setIsAccountOpen(false)}
-        username={user?.username}
-      />
-      
-      <BetAnalysisChat
-        isVisible={isBetAnalysisOpen}
-        onClose={() => setIsBetAnalysisOpen(false)}
-        bets={currentAggregatedBets}
-        totalBet={totalBetAmount}
-        balance={balance}
-        history={history}
-        userName={user?.username}
-        userPreferences={user?.bettingPreferences}
-      />
-      
-      {/* Dealer customization modal removed - default avatar used */}
+      <Suspense fallback={null}>
+        {isHistoryOpen && <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} history={sessionHistory} />}
+        
+        {isLeaderboardOpen && <LeaderboardModal 
+          isOpen={isLeaderboardOpen} 
+          onClose={() => setIsLeaderboardOpen(false)} 
+          currentUsername={user?.username}
+        />}
+        
+        {isRewardsOpen && <RewardsPanel 
+          isOpen={isRewardsOpen} 
+          onClose={() => setIsRewardsOpen(false)}
+          username={user?.username}
+          freeSpins={freeSpins}
+          referralCode={referralCode}
+          vipLevel={vipLevel}
+          onRewardClaimed={(newBalance: number, newFreeSpins: number) => {
+            setBalance(newBalance);
+            setFreeSpins(newFreeSpins);
+          }}
+        />}
+        
+        {isAccountOpen && <AccountModal 
+          isOpen={isAccountOpen} 
+          onClose={() => setIsAccountOpen(false)}
+          username={user?.username}
+        />}
+        
+        {isBetAnalysisOpen && <BetAnalysisChat
+          isVisible={isBetAnalysisOpen}
+          onClose={() => setIsBetAnalysisOpen(false)}
+          bets={currentAggregatedBets}
+          totalBet={totalBetAmount}
+          balance={balance}
+          history={history}
+          userName={user?.username}
+          userPreferences={user?.bettingPreferences}
+        />}
+        
+        {/* Dealer customization modal removed - default avatar used */}
 
-      <ConfirmationModal 
-        isOpen={!!pendingBet} 
-        betDetails={pendingBet ? { ...pendingBet, amount: selectedChip } : null}
-        onConfirm={() => pendingBet && executeBet(pendingBet.type, pendingBet.target, pendingBet.payoutRatio)}
-        onCancel={() => setPendingBet(null)}
-      />
+        {pendingBet && <ConfirmationModal 
+          isOpen={!!pendingBet} 
+          betDetails={pendingBet ? { ...pendingBet, amount: selectedChip } : null}
+          onConfirm={() => pendingBet && executeBet(pendingBet.type, pendingBet.target, pendingBet.payoutRatio)}
+          onCancel={() => setPendingBet(null)}
+        />}
+      </Suspense>
 
       {/* Header */}
       <header className="px-4 py-3 bg-gradient-to-r from-black via-gray-900 to-black backdrop-blur-md sticky top-0 z-50 shadow-2xl shadow-yellow-500/10 border-b border-yellow-500/20">

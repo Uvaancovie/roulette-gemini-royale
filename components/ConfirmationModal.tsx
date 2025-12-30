@@ -28,7 +28,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, be
             </div>
              <div className="flex justify-between border-t border-gray-700 pt-2 mt-2 items-end">
                 <span className="text-gray-400">Wager</span>
-                <span className="text-green-400 font-bold text-xl">${betDetails.amount}</span>
+                <span className="text-green-400 font-bold text-xl">R{betDetails.amount}</span>
             </div>
         </div>
         
